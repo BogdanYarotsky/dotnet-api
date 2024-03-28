@@ -36,10 +36,8 @@ app.MapGet("/bob", async (Context ctx) =>
         Age = Random.Shared.Next(0, 80),
         Name = "Bob"
     });
-
-    return user is null
-        ? Results.NotFound()
-        : Results.Ok(user);
+    await ctx.SaveChangesAsync();
+    return Results.Ok(user);
 });
 
 await using (var scope = app.Services.CreateAsyncScope())
