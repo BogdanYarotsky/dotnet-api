@@ -28,6 +28,20 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 });
 
+app.MapGet("/bob", async (Context ctx) =>
+{
+    var user = await ctx.Users.OrderBy(u => u.Id).LastOrDefaultAsync();
+    await ctx.Users.AddAsync(new User
+    {
+        Age = Random.Shared.Next(0, 80),
+        Name = "Bob"
+    });
+
+    return user is null
+        ? Results.NotFound()
+        : Results.Ok(user);
+});
+
 await using (var scope = app.Services.CreateAsyncScope())
 {
     await scope.ServiceProvider
