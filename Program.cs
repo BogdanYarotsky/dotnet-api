@@ -1,5 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<Context>(db => db.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 // Add services to the container.
 
 var app = builder.Build();
@@ -23,6 +26,13 @@ app.MapGet("/weatherforecast", () =>
         .ToArray();
     return forecast;
 });
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    await scope.ServiceProvider
+        .GetRequiredService<Context>()
+        .Database.MigrateAsync();
+}
 
 app.Run();
 
