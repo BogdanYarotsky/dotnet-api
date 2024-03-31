@@ -1,65 +1,54 @@
 using Microsoft.EntityFrameworkCore;
 
-Console.WriteLine("Going to start the app!");
+throw new Exception("If you see this you are golden!");
+var builder = WebApplication.CreateBuilder(args);
 
-try
-{
-    throw new Exception("If you see this you are golden!");
-    var builder = WebApplication.CreateBuilder(args);
-
-    builder.Services.AddDbContext<Context>(db => db.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddDbContext<Context>(db => db.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 // Add services to the container.
 
-    builder.Services.AddApplicationInsightsTelemetry();
-    var app = builder.Build();
+builder.Services.AddApplicationInsightsTelemetry();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-    var summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
-    app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    });
-
-    app.MapGet("/bob", async (Context ctx) =>
-    {
-        var user = await ctx.Users.OrderBy(u => u.Id).LastOrDefaultAsync();
-        await ctx.Users.AddAsync(new User
-        {
-            Age = Random.Shared.Next(0, 80),
-            Name = "Bob"
-        });
-        await ctx.SaveChangesAsync();
-        return Results.Ok(user);
-    });
-
-    await using (var scope = app.Services.CreateAsyncScope())
-    {
-        await scope.ServiceProvider
-            .GetRequiredService<Context>()
-            .Database.MigrateAsync();
-    }
-
-    app.Run();
-}
-catch (Exception e)
+var summaries = new[]
 {
-    Console.WriteLine(e);
-    return 1;
+    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+};
+
+app.MapGet("/weatherforecast", () =>
+{
+    var forecast = Enumerable.Range(1, 5).Select(index =>
+        new WeatherForecast
+        (
+            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+            Random.Shared.Next(-20, 55),
+            summaries[Random.Shared.Next(summaries.Length)]
+        ))
+        .ToArray();
+    return forecast;
+});
+
+app.MapGet("/bob", async (Context ctx) =>
+{
+    var user = await ctx.Users.OrderBy(u => u.Id).LastOrDefaultAsync();
+    await ctx.Users.AddAsync(new User
+    {
+        Age = Random.Shared.Next(0, 80),
+        Name = "Bob"
+    });
+    await ctx.SaveChangesAsync();
+    return Results.Ok(user);
+});
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    await scope.ServiceProvider
+        .GetRequiredService<Context>()
+        .Database.MigrateAsync();
 }
 
+app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
