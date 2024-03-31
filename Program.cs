@@ -41,7 +41,7 @@ app.MapGet("/bob", async (Context ctx) =>
 });
 
 app.MapGet("/throw", () => {
-    throw new Exception("Wazzup!");
+    throw new InvalidOperationException("Wazzup!");
 });
 
 try
