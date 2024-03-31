@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
+throw new Exception("If you see this you are golden!");
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<Context>(db => db.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
