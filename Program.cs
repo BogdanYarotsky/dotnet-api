@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 
-throw new Exception("If you see this you are golden!");
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<Context>(db => db.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
@@ -41,12 +40,22 @@ app.MapGet("/bob", async (Context ctx) =>
     return Results.Ok(user);
 });
 
-await using (var scope = app.Services.CreateAsyncScope())
+app.MapGet("/throw", () => {
+    throw new Exception("Wazzup!");
+});
+
+try
 {
+    await using var scope = app.Services.CreateAsyncScope();
     await scope.ServiceProvider
         .GetRequiredService<Context>()
         .Database.MigrateAsync();
 }
+catch (Exception e)
+{
+    app.Logger.LogError("Could not run migration! Reason: {Reason}", e.Message);
+}
+
 
 app.Run();
 
